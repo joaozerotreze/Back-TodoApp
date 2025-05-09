@@ -21,6 +21,7 @@ var userArgs = process.argv.slice(2);
 var mongoURL = userArgs[0];
 //Configurando a conexao com o Banco de Dados
 var mongoose = require('mongoose');
+var mongoURL = process.env.MONGO_DB;
 mongoose.connect(mongoURL);
 mongoose.Promise = global.Promise;
 const db = mongoose.connection;
