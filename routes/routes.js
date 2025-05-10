@@ -17,7 +17,9 @@ router.post('/post', asyncHandler(async (req, res) => {
 }));
 
 router.get('/getAll', asyncHandler(async (req, res) => {
-  const resultados = await modeloTarefa.find().sort({ createdAt: -1 });
+  const resultados = await modeloTarefa.find()
+    .sort({ createdAt: -1 })
+    .lean();
   res.json(resultados);
 }));
 
@@ -26,7 +28,7 @@ router.delete('/delete/:id', asyncHandler(async (req, res) => {
   if (!tarefa) {
     return res.status(404).json({ message: 'Tarefa não encontrada' });
   }
-  res.json({ message: 'Tarefa removida com sucesso' });
+  res.json({ message: 'Tarefa removida com sucesso', id: req.params.id });
 }));
 
 router.patch('/update/:id', asyncHandler(async (req, res) => {
