@@ -15,14 +15,19 @@ app.use(express.json());
 // Configuração do MongoDB
 const mongoURL = process.env.MONGO_DB || 'mongodb+srv://joao201692:joao123@cluster0.5dho7.mongodb.net/tarefasDB?retryWrites=true&w=majority&appName=Cluster0';
 
-mongoose.connect(mongoURL)
-  .then(() => {
-    console.log('Conexão com MongoDB estabelecida com sucesso');
-  })
-  .catch((error) => {
-    console.error('Erro ao conectar com MongoDB:', error);
-    process.exit(1);
-  });
+mongoose.connect(mongoURL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+})
+.then(() => {
+  console.log('Conexão com MongoDB estabelecida com sucesso');
+})
+.catch((error) => {
+  console.error('Erro ao conectar com MongoDB:', error);
+  process.exit(1);
+});
 
 // Middleware de logging
 app.use((req, res, next) => {
@@ -42,6 +47,18 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 3000;
 const routes = require('./routes/routes');
 app.use('/api', routes);
+
+// Garante que a conexão seja fechada corretamente quando o servidor for encerrado
+process.on('SIGINT', async () => {
+  try {
+    await mongoose.connection.close();
+    console.log('Conexão com MongoDB fechada');
+    process.exit(0);
+  } catch (err) {
+    console.error('Erro ao fechar conexão com MongoDB:', err);
+    process.exit(1);
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Servidor iniciado na porta ${PORT}`);

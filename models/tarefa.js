@@ -13,7 +13,12 @@ const schemaTarefa = new mongoose.Schema({
 },
  {
  timestamps: true,
- versionKey: false
+ versionKey: false,
+ collection: 'tarefas'
  }
 )
+
+// Adiciona índices para melhorar a performance
+schemaTarefa.index({ createdAt: -1 });
+
 module.exports = mongoose.model('Tarefa', schemaTarefa)
