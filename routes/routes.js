@@ -1,53 +1,45 @@
 const express = require('express');
-const router = express.Router()
-module.exports = router;
+const router = express.Router();
 const modeloTarefa = require('../models/tarefa');
-router.post('/post', async (req, res) => {
-    const objetoTarefa = new modeloTarefa({
-        descricao: req.body.descricao,
-        statusRealizada: req.body.statusRealizada
-    })
-    try {
-        const tarefaSalva = await objetoTarefa.save();
-        res.status(200).json(tarefaSalva)
-    }
-    catch (error) {
-        res.status(400).json({ message: error.message })
-    }
-})
 
-router.get('/getAll', async (req, res) => {
-    try {
-        const resultados = await modeloTarefa.find();
-        res.json(resultados)
-    }
-    catch (error) {
-        res.status(500).json({ message: error.message })
-    }
-})
+// Middleware de tratamento de erros assíncronos
+const asyncHandler = (fn) => (req, res, next) => {
+  Promise.resolve(fn(req, res, next)).catch(next);
+};
 
-router.delete('/delete/:id', async (req, res) => {
-    try {
-        const resultado = await modeloTarefa.findByIdAndDelete(req.params.id)
-        res.json(resultado)
-    }
-    catch (error) {
-        res.status(400).json({ message: error.message })
-    }
-})
+router.post('/post', asyncHandler(async (req, res) => {
+  const objetoTarefa = new modeloTarefa({
+    descricao: req.body.descricao,
+    statusRealizada: req.body.statusRealizada
+  });
+  const tarefaSalva = await objetoTarefa.save();
+  res.status(201).json(tarefaSalva);
+}));
 
-router.patch('/update/:id', async (req, res) => {
-    try {
-        const id = req.params.id;
-        const novaTarefa = req.body;
-        const options = { new: true };
-        const result = await modeloTarefa.findByIdAndUpdate(
-            id, novaTarefa, options
-        )
-        res.json(result)
-    }
-    catch (error) {
-        res.status(400).json({ message: error.message })
-    }
-})
+router.get('/getAll', asyncHandler(async (req, res) => {
+  const resultados = await modeloTarefa.find().sort({ createdAt: -1 });
+  res.json(resultados);
+}));
+
+router.delete('/delete/:id', asyncHandler(async (req, res) => {
+  const tarefa = await modeloTarefa.findByIdAndDelete(req.params.id);
+  if (!tarefa) {
+    return res.status(404).json({ message: 'Tarefa não encontrada' });
+  }
+  res.json({ message: 'Tarefa removida com sucesso' });
+}));
+
+router.patch('/update/:id', asyncHandler(async (req, res) => {
+  const tarefa = await modeloTarefa.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { new: true, runValidators: true }
+  );
+  if (!tarefa) {
+    return res.status(404).json({ message: 'Tarefa não encontrada' });
+  }
+  res.json(tarefa);
+}));
+
+module.exports = router;
 

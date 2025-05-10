@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+
 const schemaTarefa = new mongoose.Schema({
  descricao: {
  required: true,
@@ -6,10 +7,12 @@ const schemaTarefa = new mongoose.Schema({
  },
  statusRealizada: {
  required: true,
- type: Boolean
+ type: Boolean,
+ default: false
  },
 },
  {
+ timestamps: true,
  versionKey: false
  }
 )
