@@ -26,13 +26,16 @@ router.post('/post', asyncHandler(async (req, res) => {
 }));
 
 router.get('/getAll', asyncHandler(async (req, res) => {
-  // Força a leitura direta do banco
+  // Força a leitura direta do banco com ordenação consistente
   const resultados = await modeloTarefa.find()
-    .sort({ createdAt: -1 })
+    .sort({ createdAt: -1, _id: -1 })
     .lean()
     .exec();
     
   console.log('Tarefas encontradas:', resultados.length);
+  console.log('Primeira tarefa:', resultados[0]?.descricao);
+  console.log('Última tarefa:', resultados[resultados.length - 1]?.descricao);
+  
   res.json(resultados);
 }));
 
@@ -54,7 +57,10 @@ router.delete('/delete/:id', asyncHandler(async (req, res) => {
 router.patch('/update/:id', asyncHandler(async (req, res) => {
   const tarefa = await modeloTarefa.findByIdAndUpdate(
     req.params.id,
-    req.body,
+    {
+      ...req.body,
+      updatedAt: new Date()
+    },
     { 
       new: true, 
       runValidators: true,

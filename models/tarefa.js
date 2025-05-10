@@ -10,6 +10,14 @@ const schemaTarefa = new mongoose.Schema({
  type: Boolean,
  default: false
  },
+ createdAt: {
+ type: Date,
+ default: Date.now
+ },
+ updatedAt: {
+ type: Date,
+ default: Date.now
+ }
 },
  {
  timestamps: true,
@@ -19,6 +27,6 @@ const schemaTarefa = new mongoose.Schema({
 )
 
 // Adiciona índices para melhorar a performance
-schemaTarefa.index({ createdAt: -1 });
+schemaTarefa.index({ createdAt: -1, _id: -1 });
 
 module.exports = mongoose.model('Tarefa', schemaTarefa)
